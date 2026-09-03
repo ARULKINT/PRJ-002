@@ -34,6 +34,49 @@ function escapeRegExp(s) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+// Templates are shared across both panels and saved in this browser only
+// (localStorage) — nothing is uploaded anywhere.
+const TemplateStore = (() => {
+  const KEY = "swapsheet:templates";
+  let listeners = [];
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (err) {
+      return [];
+    }
+  }
+
+  function save(list) {
+    try {
+      localStorage.setItem(KEY, JSON.stringify(list));
+    } catch (err) {
+      // Storage unavailable (private browsing, quota, etc.) — templates
+      // just won't persist for this session; the rest of the app still works.
+    }
+    listeners.forEach((fn) => fn(list));
+  }
+
+  return {
+    all() {
+      return load();
+    },
+    add(template) {
+      const list = load();
+      list.push({ id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, ...template });
+      save(list);
+    },
+    remove(id) {
+      save(load().filter((t) => t.id !== id));
+    },
+    onChange(fn) {
+      listeners.push(fn);
+    },
+  };
+})();
+
 function initPanel(panelEl) {
   const state = {
     template: "",
@@ -51,6 +94,9 @@ function initPanel(panelEl) {
   const prevBtn = panelEl.querySelector(".prev-btn");
   const nextBtn = panelEl.querySelector(".next-btn");
   const currentWordEl = panelEl.querySelector(".current-word");
+  const templateSelect = panelEl.querySelector(".template-select");
+  const templateSaveBtn = panelEl.querySelector(".template-save-btn");
+  const templateDeleteBtn = panelEl.querySelector(".template-delete-btn");
 
   function showStatus(message) {
     statusEl.textContent = message;
@@ -189,6 +235,75 @@ function initPanel(panelEl) {
       showStatus("Selected — press Ctrl+C to copy.");
     }
   });
+
+  function refreshTemplateOptions() {
+    const templates = TemplateStore.all();
+    const previousValue = templateSelect.value;
+
+    templateSelect.innerHTML = "";
+    const placeholderOpt = document.createElement("option");
+    placeholderOpt.value = "";
+    placeholderOpt.textContent =
+      templates.length === 0 ? "No saved templates yet" : "Load a saved template…";
+    templateSelect.appendChild(placeholderOpt);
+
+    templates.forEach((t) => {
+      const optionEl = document.createElement("option");
+      optionEl.value = t.id;
+      optionEl.textContent = t.name;
+      templateSelect.appendChild(optionEl);
+    });
+
+    const stillExists = templates.some((t) => t.id === previousValue);
+    templateSelect.value = stillExists ? previousValue : "";
+    templateDeleteBtn.disabled = !stillExists;
+  }
+
+  templateSelect.addEventListener("change", () => {
+    templateDeleteBtn.disabled = templateSelect.value === "";
+    if (templateSelect.value === "") return;
+
+    const template = TemplateStore.all().find((t) => t.id === templateSelect.value);
+    if (!template) return;
+
+    passageBox.value = template.passage;
+    state.template = template.passage;
+    rebuildMarkerUI();
+    state.marker = template.marker;
+    markerSelect.value = template.marker;
+    seedBox.value = template.seed;
+    recomputeOptions();
+    showStatus(`Loaded "${template.name}"`);
+  });
+
+  templateSaveBtn.addEventListener("click", () => {
+    if (!state.template.trim()) {
+      showStatus("Paste a passage before saving a template.");
+      return;
+    }
+    const suggested = state.template.trim().slice(0, 40);
+    const name = window.prompt("Name this template:", suggested);
+    if (!name || !name.trim()) return;
+
+    TemplateStore.add({
+      name: name.trim(),
+      passage: state.template,
+      marker: state.marker || "",
+      seed: seedBox.value,
+    });
+    showStatus("Template saved!");
+  });
+
+  templateDeleteBtn.addEventListener("click", () => {
+    if (!templateSelect.value) return;
+    const template = TemplateStore.all().find((t) => t.id === templateSelect.value);
+    if (template && window.confirm(`Delete template "${template.name}"?`)) {
+      TemplateStore.remove(template.id);
+    }
+  });
+
+  TemplateStore.onChange(refreshTemplateOptions);
+  refreshTemplateOptions();
 
   updateCycleControl();
 }
