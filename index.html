@@ -9,6 +9,16 @@
 <body>
   <h1>Two-Passage Placeholder Swapper</h1>
 
+  <div class="global-actions">
+    <button id="exportTemplatesBtn" type="button">Export Templates</button>
+    <label class="import-label">
+      Import Templates
+      <input type="file" id="importTemplatesInput" accept="application/json,.json" hidden />
+    </label>
+    <span class="status" id="globalStatus" aria-live="polite"></span>
+  </div>
+  <p class="global-hint">Templates are saved only in this browser on this device. Use Export/Import to move them to another browser or device.</p>
+
   <div class="panels">
     <section class="panel" id="panel1" data-panel="1">
       <h2>Passage 1</h2>
