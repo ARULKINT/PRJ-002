@@ -1,0 +1,178 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  margin: 0;
+  padding: 24px;
+  background: #f4f5f7;
+  color: #1a1a1a;
+}
+
+h1 {
+  font-size: 1.4rem;
+  margin: 0 0 16px;
+  text-align: center;
+}
+
+h2 {
+  font-size: 1.05rem;
+  margin: 0 0 12px;
+}
+
+.panels {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+@media (min-width: 800px) {
+  .panels {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.panel {
+  background: #ffffff;
+  border: 2px solid #1a1a1a;
+  border-radius: 8px;
+  padding: 16px;
+  min-width: 0;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+button {
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 8px 14px;
+  border: 2px solid #1a1a1a;
+  border-radius: 6px;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #eef0f3;
+}
+
+button:active {
+  background: #dfe3e8;
+}
+
+.status {
+  font-size: 0.85rem;
+  color: #2f7a3d;
+  min-height: 1.2em;
+}
+
+.passage-box {
+  width: 100%;
+  min-height: 110px;
+  border: 2px solid #1a1a1a;
+  border-radius: 6px;
+  padding: 10px 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: inherit;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin-bottom: 14px;
+  background: #fafafa;
+  resize: vertical;
+}
+
+.passage-box::placeholder {
+  color: #8a8a8a;
+}
+
+.passage-box.placeholder-missing {
+  border-color: #b23b3b;
+}
+
+.marker-label {
+  display: block;
+  font-size: 0.8rem;
+  color: #555;
+  margin-bottom: 6px;
+}
+
+.marker-select {
+  width: 100%;
+  font-family: inherit;
+  font-size: 0.9rem;
+  padding: 8px 10px;
+  border: 2px solid #1a1a1a;
+  border-radius: 6px;
+  margin-bottom: 14px;
+  background: #ffffff;
+}
+
+.seed-label {
+  display: block;
+  font-size: 0.8rem;
+  color: #555;
+  margin-bottom: 6px;
+}
+
+.seed-box {
+  width: 100%;
+  min-height: 120px;
+  border: 2px solid #1a1a1a;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin-bottom: 10px;
+  background: #fafafa;
+  resize: vertical;
+  cursor: text;
+}
+
+.seed-box.has-active {
+  border-color: #2b6fd1;
+  background: #eaf3ff;
+}
+
+.cycle-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.cycle-control .prev-btn,
+.cycle-control .next-btn {
+  padding: 6px 12px;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.cycle-control .prev-btn:disabled,
+.cycle-control .next-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.cycle-control .current-word {
+  flex: 1;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 6px 10px;
+  border: 2px solid #1a1a1a;
+  border-radius: 6px;
+  background: #eaf3ff;
+  word-break: break-word;
+}
+
