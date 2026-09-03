@@ -1,0 +1,53 @@
+/**
+ * Small, dependency-free text helpers shared by the replacement-options
+ * list and the per-passage word picker. No DOM access, no app state —
+ * safe to unit-test or reuse on their own.
+ */
+
+/**
+ * Splits raw replacement-list text into trimmed, non-empty entries, and
+ * records each entry's [start, end) character range within the original
+ * string. The ranges let the UI figure out "which line did the user just
+ * click on" from a plain caret position (see js/replacement-options.js).
+ *
+ * Two input shapes are supported:
+ *   - One item per line (typing, or pasting an Excel column / CSV rows).
+ *   - A single line of comma-separated values.
+ */
+export function parseOptionsWithRanges(raw) {
+  const lines = raw.split(/\r\n|\r|\n/);
+  const segments = [];
+
+  if (lines.length === 1 && lines[0].includes(",")) {
+    let pos = 0;
+    raw.split(",").forEach((part) => {
+      const start = pos;
+      const end = pos + part.length;
+      segments.push({ raw: part, start, end });
+      pos = end + 1; // +1 for the comma
+    });
+  } else {
+    let pos = 0;
+    lines.forEach((line) => {
+      const start = pos;
+      const end = pos + line.length;
+      segments.push({ raw: line, start, end });
+      pos = end + 1; // +1 for the newline
+    });
+  }
+
+  return segments
+    .map((seg) => ({ text: seg.raw.trim(), start: seg.start, end: seg.end }))
+    .filter((seg) => seg.text.length > 0);
+}
+
+/** Distinct whole words found in `text`, sorted — feeds the "word to replace" dropdown. */
+export function getDistinctWords(text) {
+  const matches = text.match(/[A-Za-z0-9']+/g) || [];
+  return [...new Set(matches)].sort();
+}
+
+/** Escapes regex metacharacters so a literal word can be used inside `new RegExp(...)`. */
+export function escapeRegExp(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}

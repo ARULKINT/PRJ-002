@@ -19,6 +19,20 @@
   </div>
   <p class="global-hint">Templates are saved only in this browser on this device. Use Export/Import to move them to another browser or device.</p>
 
+  <section class="shared-options">
+    <h2>Replacement Options</h2>
+    <p class="shared-sub">Shared by both passages below — pick one here and it applies to whichever word each passage has chosen.</p>
+
+    <div class="cycle-control">
+      <button class="prev-btn" aria-label="Previous replacement" disabled>◀</button>
+      <span class="current-word">No options yet</span>
+      <button class="next-btn" aria-label="Next replacement" disabled>▶</button>
+    </div>
+
+    <label class="seed-label">Paste one per line (Excel column, CSV) or comma-separated. Click a line to use it.</label>
+    <textarea class="seed-box" placeholder="Alex&#10;Jordan&#10;Sam"></textarea>
+  </section>
+
   <div class="panels">
     <section class="panel" id="panel1" data-panel="1">
       <h2>Passage 1</h2>
@@ -35,21 +49,12 @@
         <button class="template-save-btn" type="button">Save as Template</button>
       </div>
 
-      <div class="cycle-control">
-        <button class="prev-btn" aria-label="Previous replacement" disabled>◀</button>
-        <span class="current-word">No options yet</span>
-        <button class="next-btn" aria-label="Next replacement" disabled>▶</button>
-      </div>
-
       <textarea class="passage-box" placeholder="Paste (Ctrl+V) any passage here."></textarea>
 
       <label class="marker-label">Word to replace — picked from your passage, applies everywhere it appears until you change the passage</label>
       <select class="marker-select">
         <option value="" disabled selected>Paste a passage first…</option>
       </select>
-
-      <label class="seed-label">Replacement options — paste one per line (Excel column, CSV) or comma-separated. Click a line to use it.</label>
-      <textarea class="seed-box" placeholder="Alex&#10;Jordan&#10;Sam"></textarea>
     </section>
 
     <section class="panel" id="panel2" data-panel="2">
@@ -67,24 +72,15 @@
         <button class="template-save-btn" type="button">Save as Template</button>
       </div>
 
-      <div class="cycle-control">
-        <button class="prev-btn" aria-label="Previous replacement" disabled>◀</button>
-        <span class="current-word">No options yet</span>
-        <button class="next-btn" aria-label="Next replacement" disabled>▶</button>
-      </div>
-
       <textarea class="passage-box" placeholder="Paste (Ctrl+V) any passage here."></textarea>
 
       <label class="marker-label">Word to replace — picked from your passage, applies everywhere it appears until you change the passage</label>
       <select class="marker-select">
         <option value="" disabled selected>Paste a passage first…</option>
       </select>
-
-      <label class="seed-label">Replacement options — paste one per line (Excel column, CSV) or comma-separated. Click a line to use it.</label>
-      <textarea class="seed-box" placeholder="Alex&#10;Jordan&#10;Sam"></textarea>
     </section>
   </div>
 
-  <script src="script.js"></script>
+  <script type="module" src="js/main.js"></script>
 </body>
 </html>
