@@ -8,9 +8,14 @@
  * js/replacement-options.js.
  */
 
-import { escapeRegExp, getDistinctWords } from "./text-utils.js";
+import { getDistinctWords, applyMarkerReplacement } from "./text-utils.js";
 import { TemplateStore } from "./template-store.js";
 import { ReplacementOptions } from "./replacement-options.js";
+
+/** Escapes HTML special characters so passage text can't be misread as markup. */
+function escapeHtml(s) {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
 
 export function initPanel(panelEl) {
   const state = {
@@ -21,6 +26,7 @@ export function initPanel(panelEl) {
   const copyBtn = panelEl.querySelector(".copy-btn");
   const statusEl = panelEl.querySelector(".status");
   const passageBox = panelEl.querySelector(".passage-box");
+  const passageBackdrop = panelEl.querySelector(".passage-backdrop");
   const markerSelect = panelEl.querySelector(".marker-select");
   const templateSelect = panelEl.querySelector(".template-select");
   const templateSaveBtn = panelEl.querySelector(".template-save-btn");
@@ -36,16 +42,44 @@ export function initPanel(panelEl) {
 
   // ---- Passage preview -----------------------------------------------
 
-  /** Recomputes what the passage box shows: raw template, or with the marker swapped. */
+  // The passage box has to stay a real, editable <textarea> (so typing and
+  // native Ctrl+V paste keep working) — but a plain textarea can't render
+  // colored spans. So a same-sized, non-interactive backdrop <div> sits
+  // exactly behind it; the textarea's own background is transparent, so
+  // the backdrop's highlighted <mark> regions show through behind the
+  // textarea's real (opaque) text on top.
+  function updateBackdrop(text, ranges) {
+    let html = "";
+    let pos = 0;
+    ranges.forEach(({ start, end }) => {
+      html += escapeHtml(text.slice(pos, start));
+      html += `<mark>${escapeHtml(text.slice(start, end))}</mark>`;
+      pos = end;
+    });
+    html += escapeHtml(text.slice(pos));
+    // Trailing "&nbsp;" keeps a trailing blank line from collapsing, so
+    // the backdrop's height/wrapping always matches the textarea's.
+    passageBackdrop.innerHTML = html + "&nbsp;";
+  }
+
+  /** Recomputes what the passage box shows: raw template, or with the marker swapped (highlighted). */
   function renderPreview() {
     const value = ReplacementOptions.activeValue();
     if (state.marker === null || value === null) {
       passageBox.value = state.template;
+      updateBackdrop(state.template, []);
     } else {
-      const pattern = new RegExp(`\\b${escapeRegExp(state.marker)}\\b`, "g");
-      passageBox.value = state.template.replace(pattern, () => value);
+      const { text, ranges } = applyMarkerReplacement(state.template, state.marker, value);
+      passageBox.value = text;
+      updateBackdrop(text, ranges);
     }
   }
+
+  // Keep the highlight backdrop scrolling in lockstep with the textarea.
+  passageBox.addEventListener("scroll", () => {
+    passageBackdrop.scrollTop = passageBox.scrollTop;
+    passageBackdrop.scrollLeft = passageBox.scrollLeft;
+  });
 
   /** Rebuilds the "word to replace" dropdown from the words in the current passage. */
   function rebuildMarkerUI() {

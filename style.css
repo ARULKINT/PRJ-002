@@ -130,10 +130,21 @@ button:active {
   min-height: 1.2em;
 }
 
+/* The passage box is a real, editable <textarea> — typing and native
+   Ctrl+V paste have to keep working — layered over a same-sized,
+   non-interactive backdrop <div> that renders the highlighted copy. The
+   two share every box-model property (border, padding, font, line-height)
+   so the highlighted regions land exactly under the textarea's own text. */
+.passage-wrap {
+  position: relative;
+  margin-bottom: 14px;
+}
+
+.passage-backdrop,
 .passage-box {
   width: 100%;
   min-height: 110px;
-  border: 2px solid #1a1a1a;
+  border: 2px solid transparent;
   border-radius: 6px;
   padding: 10px 12px;
   white-space: pre-wrap;
@@ -141,8 +152,27 @@ button:active {
   font-family: inherit;
   font-size: 0.95rem;
   line-height: 1.5;
-  margin-bottom: 14px;
+}
+
+.passage-backdrop {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  overflow: hidden;
+  color: transparent;
   background: #fafafa;
+  border-color: #1a1a1a;
+  pointer-events: none;
+}
+
+.passage-backdrop mark {
+  background: #ffe28a;
+  border-radius: 2px;
+}
+
+.passage-box {
+  position: relative;
+  background: transparent;
   resize: vertical;
 }
 

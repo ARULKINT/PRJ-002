@@ -51,3 +51,33 @@ export function getDistinctWords(text) {
 export function escapeRegExp(s) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
+
+/**
+ * Replaces every whole-word occurrence of `marker` in `template` with
+ * `value`, and — unlike a plain String.replace — also reports back where
+ * each inserted `value` landed in the RESULT string. That's what lets the
+ * passage box highlight exactly the text it just swapped in (see
+ * js/panel.js), even though `value` may be a different length than
+ * `marker`, which shifts every later match's position.
+ *
+ * Returns { text, ranges } where each range is a { start, end } pair
+ * (end exclusive) into `text`.
+ */
+export function applyMarkerReplacement(template, marker, value) {
+  const pattern = new RegExp(`\\b${escapeRegExp(marker)}\\b`, "g");
+  let result = "";
+  let lastIndex = 0;
+  const ranges = [];
+  let match;
+
+  while ((match = pattern.exec(template)) !== null) {
+    result += template.slice(lastIndex, match.index);
+    const start = result.length;
+    result += value;
+    ranges.push({ start, end: result.length });
+    lastIndex = match.index + match[0].length;
+  }
+  result += template.slice(lastIndex);
+
+  return { text: result, ranges };
+}
