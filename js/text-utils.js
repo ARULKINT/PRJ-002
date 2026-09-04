@@ -53,6 +53,18 @@ export function escapeRegExp(s) {
 }
 
 /**
+ * Finds the first WhatsApp-style bold span in `text` — text wrapped
+ * tightly in *asterisks* with no space touching either star, which is
+ * WhatsApp's own rule for what actually renders bold (`*Sam*` bolds,
+ * `* Sam *` doesn't). Returns the text between the asterisks (asterisks
+ * not included), or null if there isn't one.
+ */
+export function detectAsteriskMarker(text) {
+  const match = text.match(/\*(\S(?:[^*\n]*\S)?)\*/);
+  return match ? match[1] : null;
+}
+
+/**
  * Replaces every whole-word occurrence of `marker` in `template` with
  * `value`, and — unlike a plain String.replace — also reports back where
  * each inserted `value` landed in the RESULT string. That's what lets the

@@ -8,7 +8,7 @@
  * js/replacement-options.js.
  */
 
-import { getDistinctWords, applyMarkerReplacement } from "./text-utils.js";
+import { getDistinctWords, applyMarkerReplacement, detectAsteriskMarker } from "./text-utils.js";
 import { TemplateStore } from "./template-store.js";
 import { ReplacementOptions } from "./replacement-options.js";
 
@@ -84,6 +84,10 @@ export function initPanel(panelEl) {
   /** Rebuilds the "word to replace" dropdown from the words in the current passage. */
   function rebuildMarkerUI() {
     const words = getDistinctWords(state.template);
+    // A word/phrase wrapped tightly in *asterisks* — WhatsApp's own bold
+    // syntax — is treated as an explicit marker: picked automatically, no
+    // need to choose it from the dropdown by hand.
+    const starred = detectAsteriskMarker(state.template);
 
     markerSelect.innerHTML = "";
     const placeholderOpt = document.createElement("option");
@@ -92,6 +96,13 @@ export function initPanel(panelEl) {
     placeholderOpt.textContent =
       words.length === 0 ? "Paste a passage first…" : "Choose word…";
     markerSelect.appendChild(placeholderOpt);
+
+    if (starred && !words.includes(starred)) {
+      const starredOpt = document.createElement("option");
+      starredOpt.value = starred;
+      starredOpt.textContent = `${starred} (bolded with *stars*)`;
+      markerSelect.appendChild(starredOpt);
+    }
 
     words.forEach((word) => {
       const optionEl = document.createElement("option");
@@ -102,10 +113,17 @@ export function initPanel(panelEl) {
 
     // Marker is reset whenever the underlying passage changes (see the
     // passage-box "input" handler below) — a marker from a previous
-    // passage may no longer make sense, so the user re-picks it.
-    state.marker = null;
-    markerSelect.value = "";
-    placeholderOpt.selected = true;
+    // passage may no longer make sense. But if the new passage has a
+    // *starred* word, pick that up automatically instead of making the
+    // user re-pick it every time.
+    if (starred) {
+      state.marker = starred;
+      markerSelect.value = starred;
+    } else {
+      state.marker = null;
+      markerSelect.value = "";
+      placeholderOpt.selected = true;
+    }
     renderPreview();
   }
 
